@@ -1,14 +1,21 @@
+use std::env;
 use std::fs;
 use std::io;
 
-const CONFIG_PATH: &str = "config.txt";
-
-fn read_config() -> Result<String, io::Error> {
-    fs::read_to_string(CONFIG_PATH)
+fn read_config(path: &str) -> Result<String, io::Error> {
+    fs::read_to_string(path)
 }
 
 fn main() -> Result<(), io::Error> {
-    let contents = read_config()?;
+    let path = match env::args().nth(1) {
+        Some(path) => path,
+        None => {
+            eprintln!("usage: quick-os <config-path>");
+            std::process::exit(2);
+        }
+    };
+
+    let contents = read_config(&path)?;
     print!("{contents}");
     Ok(())
 }

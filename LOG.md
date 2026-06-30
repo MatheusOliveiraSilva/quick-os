@@ -45,4 +45,19 @@ Projeto pessoal: agent dispatcher em Rust (Firecracker microVMs, snapshot/fork/r
 > `?` é **early return** tipado: se `Result` for `Err`, a função retorna imediatamente com esse erro (como `return Err(e)`); se for `Ok(v)`, desempacota `v`. Só funciona em funções que retornam `Result` (ou `Option`) compatível.
 
 **Próximo**
-- Path via CLI (`std::env::args`) — input externo sem hardcode
+- ~~Path via CLI (`std::env::args`) — input externo sem hardcode~~ → feito no passo 4
+
+---
+
+## Passo 4 — CLI args + `Option`
+
+**O que construímos**
+- Path vem de `std::env::args().nth(1)` (primeiro argumento do usuário)
+- Sem arg → mensagem de usage em stderr + `exit(2)`
+- `read_config(path: &str)` recebe o path emprestado (`&str`), não hardcoded
+
+**Conceito para lembrar**
+> `Option<T>` modela *presença/ausência* de valor (arg opcional). `Result<T, E>` modela *sucesso/falha* de operação. Args: `None` = usuário não passou; I/O: `Err` = syscall falhou — são problemas diferentes, tipos diferentes.
+
+**Próximo**
+- Struct para carregar config (ownership: quem owns o path/conteúdo?)

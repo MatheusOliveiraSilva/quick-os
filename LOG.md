@@ -30,4 +30,19 @@ Projeto pessoal: agent dispatcher em Rust (Firecracker microVMs, snapshot/fork/r
 > `Result<T, E>` é o WAL aplicado ao control flow: a função **não esconde** falha atrás de errno global ou exceção — ela **retorna** `Ok(valor)` ou `Err(motivo)` e você decide quando fazer commit (propagar, logar, abortar).
 
 **Próximo**
-- Operador `?` para propagar `Err` sem `match` aninhado (e/ou `fn main() -> Result<...>`)
+- ~~Operador `?` para propagar `Err` sem `match` aninhado (e/ou `fn main() -> Result<...>`)~~ → feito no passo 3
+
+---
+
+## Passo 3 — Operador `?` + `main -> Result`
+
+**O que construímos**
+- `read_config()` extrai a leitura; retorna `Result<String, io::Error>`
+- `main() -> Result<(), io::Error>` usa `?` para propagar `Err`
+- Sucesso termina com `Ok(())` — runtime converte em exit 0
+
+**Conceito para lembrar**
+> `?` é **early return** tipado: se `Result` for `Err`, a função retorna imediatamente com esse erro (como `return Err(e)`); se for `Ok(v)`, desempacota `v`. Só funciona em funções que retornam `Result` (ou `Option`) compatível.
+
+**Próximo**
+- Path via CLI (`std::env::args`) — input externo sem hardcode

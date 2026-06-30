@@ -1,15 +1,14 @@
 use std::fs;
+use std::io;
 
-fn main() {
-    const CONFIG_PATH: &str = "config.txt";
+const CONFIG_PATH: &str = "config.txt";
 
-    match fs::read_to_string(CONFIG_PATH) {
-        Ok(contents) => {
-            print!("{contents}");
-        }
-        Err(error) => {
-            eprintln!("quick-os: could not read {CONFIG_PATH}: {error}");
-            std::process::exit(1);
-        }
-    }
+fn read_config() -> Result<String, io::Error> {
+    fs::read_to_string(CONFIG_PATH)
+}
+
+fn main() -> Result<(), io::Error> {
+    let contents = read_config()?;
+    print!("{contents}");
+    Ok(())
 }

@@ -15,4 +15,19 @@ Projeto pessoal: agent dispatcher em Rust (Firecracker microVMs, snapshot/fork/r
 > `Cargo.toml` declara *policy* (nome, edition, deps); o Cargo orquestra compile/run/test; `fn main()` é o entry point do **binary** — o OS carrega o executável e começa ali (como `_start` → `main` em C, só que o runtime Rust já inicializou antes).
 
 **Próximo**
-- Primeiro `Result` real: error handling explícito vs panic/errno implícito (provavelmente via `std::env::args` ou leitura de arquivo que pode falhar)
+- ~~Primeiro `Result` real~~ → feito no passo 2
+
+---
+
+## Passo 2 — Primeiro `Result` (`fs::read_to_string`)
+
+**O que construímos**
+- `main.rs` lê `config.txt` via `std::fs::read_to_string`
+- Tratamos sucesso (`Ok`) e falha (`Err`) com `match` — sem panic
+- Falha → mensagem em stderr + `exit(1)`
+
+**Conceito para lembrar**
+> `Result<T, E>` é o WAL aplicado ao control flow: a função **não esconde** falha atrás de errno global ou exceção — ela **retorna** `Ok(valor)` ou `Err(motivo)` e você decide quando fazer commit (propagar, logar, abortar).
+
+**Próximo**
+- Operador `?` para propagar `Err` sem `match` aninhado (e/ou `fn main() -> Result<...>`)

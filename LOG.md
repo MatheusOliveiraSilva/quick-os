@@ -60,4 +60,19 @@ Projeto pessoal: agent dispatcher em Rust (Firecracker microVMs, snapshot/fork/r
 > `Option<T>` modela *presença/ausência* de valor (arg opcional). `Result<T, E>` modela *sucesso/falha* de operação. Args: `None` = usuário não passou; I/O: `Err` = syscall falhou — são problemas diferentes, tipos diferentes.
 
 **Próximo**
-- Struct para carregar config (ownership: quem owns o path/conteúdo?)
+- ~~Struct para carregar config (ownership: quem owns o path/conteúdo?)~~ → feito no passo 5
+
+---
+
+## Passo 5 — Struct `Config` + move ownership
+
+**O que construímos**
+- `Config { path, contents }` agrupa os dois `String` relacionados
+- `read_config(path: String)` recebe ownership do path; move ambos para dentro de `Config`
+- `main` passa `path` para `read_config(path)?` — **move**; `path` não existe mais em `main` depois disso
+
+**Conceito para lembrar**
+> Ownership segue o valor, não o escopo lexical imaginário. `move` transfere responsabilidade de liberar memória: depois de `read_config(path)`, `main` não pode usar `path` — `Config` owns. Borrow (`&str`) empresta; move (`String`) entrega a chave.
+
+**Próximo**
+- Usar `config.path` (observability: logar de onde veio o conteúdo) — ou parsear conteúdo em campos tipados

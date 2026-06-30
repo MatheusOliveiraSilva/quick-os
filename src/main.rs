@@ -2,8 +2,14 @@ use std::env;
 use std::fs;
 use std::io;
 
-fn read_config(path: &str) -> Result<String, io::Error> {
-    fs::read_to_string(path)
+struct Config {
+    path: String,
+    contents: String,
+}
+
+fn read_config(path: String) -> Result<Config, io::Error> {
+    let contents = fs::read_to_string(&path)?;
+    Ok(Config { path, contents })
 }
 
 fn main() -> Result<(), io::Error> {
@@ -15,7 +21,7 @@ fn main() -> Result<(), io::Error> {
         }
     };
 
-    let contents = read_config(&path)?;
-    print!("{contents}");
+    let config = read_config(path)?;
+    print!("{}", config.contents);
     Ok(())
 }

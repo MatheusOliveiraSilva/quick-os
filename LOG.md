@@ -4,75 +4,39 @@ Projeto pessoal: agent dispatcher em Rust (Firecracker microVMs, snapshot/fork/r
 
 ---
 
-## Passo 1 — Cargo init + binary mínimo
+## Passos 1–5 (fundamentos Rust)
 
-**O que construímos**
-- `Cargo.toml` — manifest do crate `quick-os` (edition 2021, sem dependências)
-- `src/main.rs` — entry point `fn main()` que imprime uma linha
-- Validado com `cargo build` e `cargo run`
-
-**Conceito para lembrar**
-> `Cargo.toml` declara *policy* (nome, edition, deps); o Cargo orquestra compile/run/test; `fn main()` é o entry point do **binary** — o OS carrega o executável e começa ali (como `_start` → `main` em C, só que o runtime Rust já inicializou antes).
-
-**Próximo**
-- ~~Primeiro `Result` real~~ → feito no passo 2
+Cobertos na branch inicial: Cargo, `Result`, `?`, CLI args, `Option`, struct + ownership.
+Ver histórico de commits `ce26e43..a057555`.
 
 ---
 
-## Passo 2 — Primeiro `Result` (`fs::read_to_string`)
+## Passo 6 — Scaffold completo do dispatcher
 
 **O que construímos**
-- `main.rs` lê `config.txt` via `std::fs::read_to_string`
-- Tratamos sucesso (`Ok`) e falha (`Err`) com `match` — sem panic
-- Falha → mensagem em stderr + `exit(1)`
+
+Workspace Cargo com 5 crates:
+
+| Crate | Responsabilidade |
+|-------|------------------|
+| `quick-os-core` | `AppConfig`, `AgentId`, `SnapshotRef`, `QuickOsError` |
+| `quick-os-firecracker` | HTTP client via Unix socket, boot/restore/snapshot VM |
+| `quick-os-dispatcher` | Orquestra agents, fork via snapshot restore |
+| `quick-os-tools` | Tool registry + Axum HTTP (`/tools`, `/agents`, `/events`) |
+| `quick-os` | CLI: `check-env`, `snapshot-create`, `agent-spawn`, `serve` |
+
+Ambiente de dev:
+
+- `configs/quick-os.toml` — config runtime
+- `scripts/setup-dev.sh` — download Firecracker, kernel Alpine, rootfs ext4
+- `docker/docker-compose.yml` — dev container com `/dev/kvm` passthrough
 
 **Conceito para lembrar**
-> `Result<T, E>` é o WAL aplicado ao control flow: a função **não esconde** falha atrás de errno global ou exceção — ela **retorna** `Ok(valor)` ou `Err(motivo)` e você decide quando fazer commit (propagar, logar, abortar).
+
+> **Snapshot/fork** aqui é restore de microVM a partir de `vm_state.snap` + `mem.snap` — CoW via `enable_diff_snapshots: true` no load. Dispatcher não re-boota kernel; **restaura estado** e resume. Tool surface expõe cada operação como tool invocável + event log observável.
 
 **Próximo**
-- ~~Operador `?` para propagar `Err` sem `match` aninhado (e/ou `fn main() -> Result<...>`)~~ → feito no passo 3
 
----
-
-## Passo 3 — Operador `?` + `main -> Result`
-
-**O que construímos**
-- `read_config()` extrai a leitura; retorna `Result<String, io::Error>`
-- `main() -> Result<(), io::Error>` usa `?` para propagar `Err`
-- Sucesso termina com `Ok(())` — runtime converte em exit 0
-
-**Conceito para lembrar**
-> `?` é **early return** tipado: se `Result` for `Err`, a função retorna imediatamente com esse erro (como `return Err(e)`); se for `Ok(v)`, desempacota `v`. Só funciona em funções que retornam `Result` (ou `Option`) compatível.
-
-**Próximo**
-- ~~Path via CLI (`std::env::args`) — input externo sem hardcode~~ → feito no passo 4
-
----
-
-## Passo 4 — CLI args + `Option`
-
-**O que construímos**
-- Path vem de `std::env::args().nth(1)` (primeiro argumento do usuário)
-- Sem arg → mensagem de usage em stderr + `exit(2)`
-- `read_config(path: &str)` recebe o path emprestado (`&str`), não hardcoded
-
-**Conceito para lembrar**
-> `Option<T>` modela *presença/ausência* de valor (arg opcional). `Result<T, E>` modela *sucesso/falha* de operação. Args: `None` = usuário não passou; I/O: `Err` = syscall falhou — são problemas diferentes, tipos diferentes.
-
-**Próximo**
-- ~~Struct para carregar config (ownership: quem owns o path/conteúdo?)~~ → feito no passo 5
-
----
-
-## Passo 5 — Struct `Config` + move ownership
-
-**O que construímos**
-- `Config { path, contents }` agrupa os dois `String` relacionados
-- `read_config(path: String)` recebe ownership do path; move ambos para dentro de `Config`
-- `main` passa `path` para `read_config(path)?` — **move**; `path` não existe mais em `main` depois disso
-
-**Conceito para lembrar**
-> Ownership segue o valor, não o escopo lexical imaginário. `move` transfere responsabilidade de liberar memória: depois de `read_config(path)`, `main` não pode usar `path` — `Config` owns. Borrow (`&str`) empresta; move (`String`) entrega a chave.
-
-**Próximo**
-- Usar `config.path` (observability: logar de onde veio o conteúdo) — ou parsear conteúdo em campos tipados
+- Guest agent in-VM (comunicação host ↔ microVM)
+- Jailer + network namespace por agent
+- Dirty-page tracking para snapshot incremental

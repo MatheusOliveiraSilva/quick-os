@@ -1,0 +1,16 @@
+[firecracker]
+binary = "/usr/local/bin/firecracker"
+data_dir = "var/quick-os"
+
+[guest]
+kernel_path = "assets/vmlinux"
+rootfs_path = "assets/rootfs.ext4"
+vcpu_count = 2
+mem_size_mib = 512
+
+[dispatcher]
+base_snapshot_id = "base"
+max_agents = 16
+
+[tools]
+listen = "127.0.0.1:8080"

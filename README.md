@@ -2,7 +2,7 @@
 
 Agent dispatcher in Rust on **Firecracker microVMs** — snapshot/fork/restore for fast agent isolation and an **observable HTTP tool surface**.
 
-> **Reviewing PR #4 from mobile?** Start here → **[REVIEW.md](REVIEW.md)** (diagrams + demo output + file guide)
+> **Reviewing from mobile?** Start here → **[REVIEW.md](REVIEW.md)** (PR #5)
 
 ## Architecture
 

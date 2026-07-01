@@ -1,7 +1,8 @@
-# PR #4 — Review guide (mobile-friendly)
+# PR #5 — Review guide (mobile-friendly)
 
-> **Branch:** `cursor/quick-os-bb04` → `main`  
-> **Commits:** 7 (learning steps 1–5 + full scaffold + demo harness)
+> **Branch:** `cursor/quick-os-dispatcher-bb04` → `main`  
+> **PR:** https://github.com/MatheusOliveiraSilva/quick-os/pull/5  
+> **Commits:** 8 (learning steps 1–5 + full scaffold + demo harness + this guide)
 
 Este arquivo existe porque a **descrição do PR no GitHub ficou desatualizada** (API do agent não consegue editar). **Tudo que importa está aqui e no diff.**
 

@@ -1,0 +1,24 @@
+[package]
+name = "quick-os"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "quick-os"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+quick-os-core = { workspace = true }
+quick-os-dispatcher = { workspace = true }
+quick-os-firecracker = { workspace = true }
+quick-os-tools = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true }

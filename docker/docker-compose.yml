@@ -1,0 +1,14 @@
+services:
+  quick-os:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    privileged: true
+    devices:
+      - /dev/kvm:/dev/kvm
+    volumes:
+      - ..:/workspace
+    ports:
+      - "8080:8080"
+    working_dir: /workspace
+    command: bash -lc "scripts/setup-dev.sh && cargo run -p quick-os -- serve"

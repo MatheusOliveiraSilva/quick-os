@@ -1,0 +1,16 @@
+==> agent-os pivot demo
+workspace: /tmp/tmp.RR8dW5FIVm
+
+--- read_workspace ---
+>> {"op":"read_workspace","path":"hello.txt"}
+<< {"ok":true,"result":{"content":"hello from agent-os\n","path":"hello.txt"}}
+
+--- run_tool echo ---
+>> {"op":"run_tool","name":"echo","input":{"message":"pivot ok"}}
+<< {"ok":true,"result":{"message":"pivot ok"}}
+
+--- emit_event ---
+>> {"op":"emit_event","kind":"agent.started","payload":{"model":"demo"}}
+<< {"ok":true,"result":{"event":{"kind":"agent.started","payload":{"model":"demo"}},"recorded":true}}
+
+==> demo complete (guest runtime v1 primitives OK)

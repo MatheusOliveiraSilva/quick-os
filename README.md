@@ -2,7 +2,8 @@
 
 **Host orchestrator** (quick-os) + **Agent Operating Environment** (agent-os) on Firecracker microVMs.
 
-> **Review PR #5:** [REVIEW.md](REVIEW.md) · **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+> **Review PR #5:** [REVIEW.md](REVIEW.md) · **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)  
+> **Mobile / diagramas PNG:** [docs/DIAGRAMS.md](docs/DIAGRAMS.md) · **Python→Rust:** [docs/RUST-CONCEPTS.md](docs/RUST-CONCEPTS.md)
 
 ## Pivot (Path A)
 

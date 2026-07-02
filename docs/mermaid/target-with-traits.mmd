@@ -1,0 +1,45 @@
+flowchart TB
+    subgraph traits_host["Traits no host — refatoração planejada"]
+        VT["trait GuestTransport\ninvoke(req) → resp"]
+        HT["trait HostTool\ndescriptor + invoke"]
+        VB_T["trait VmBackend\nboot / restore / snapshot"]
+    end
+
+    subgraph impls_host["Implementações"]
+        VS[VsockTransport]
+        STD[StdioTransport — dev]
+        AT1[AgentsListTool]
+        AT2[AgentsSpawnTool]
+        AT3[SnapshotsCreateTool]
+        FC_IMPL[FirecrackerVmBackend]
+        FAKE[FakeVmBackend — testes]
+    end
+
+    subgraph guest_traits["Traits no guest"]
+        GP["trait GuestPrimitive\nhandle(ctx, input)"]
+    end
+
+    subgraph guest_impls["Implementações guest"]
+        P1[ReadWorkspacePrimitive]
+        P2[RunToolPrimitive]
+        P3[EmitEventPrimitive]
+        GT["trait Tool — echo, pwd, ..."]
+    end
+
+    DISP2[Dispatcher] --> VB_T
+    DISP2 --> VT
+    REG2[ToolRegistry] --> HT
+    RT2[AgentRuntime] --> GP
+
+    VT --> VS
+    VT --> STD
+    HT --> AT1
+    HT --> AT2
+    HT --> AT3
+    VB_T --> FC_IMPL
+    VB_T --> FAKE
+
+    GP --> P1
+    GP --> P2
+    GP --> P3
+    P2 --> GT

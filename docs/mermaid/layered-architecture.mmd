@@ -1,0 +1,41 @@
+flowchart TB
+    subgraph L4["Camada 4 — Interface"]
+        CLI[quick-os CLI]
+        HTTP[ToolServer HTTP]
+    end
+
+    subgraph L3["Camada 3 — Aplicação / Facade"]
+        REG[ToolRegistry]
+        DISP[Dispatcher]
+    end
+
+    subgraph L2["Camada 2 — Infraestrutura"]
+        VM[VmBuilder + FirecrackerClient]
+        GUEST_T["GuestTransport — futuro"]
+    end
+
+    subgraph L1["Camada 1 — Domínio compartilhado"]
+        CORE[quick-os-core: tipos, protocolo, erros]
+    end
+
+    subgraph L0["Camada 0 — Guest produto"]
+        AGENT[agent-os: AgentRuntime + primitivas]
+    end
+
+    CLI --> REG
+    HTTP --> REG
+    REG --> DISP
+    DISP --> VM
+    DISP -.-> GUEST_T
+    GUEST_T -.-> AGENT
+
+    CLI --> CORE
+    REG --> CORE
+    DISP --> CORE
+    VM --> CORE
+    AGENT --> CORE
+
+    L4 --> L3
+    L3 --> L2
+    L2 --> L1
+    L2 -.-> L0

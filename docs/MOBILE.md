@@ -1,3 +1,28 @@
+# Mobile — revisar pelo celular
+
+## Regra de diagramas (Matheus)
+
+**Sempre pedir link PNG** — mermaid no app GitHub não renderiza de forma confiável.
+
+Índice: **[DIAGRAMS.md](DIAGRAMS.md)** · gerar: `./scripts/render-diagrams.sh`
+
+Exemplo:
+
+https://raw.githubusercontent.com/MatheusOliveiraSilva/quick-os/main/docs/images/current-connections.png
+
+---
+
+## Guias novos (Python → Rust)
+
+| Doc | O quê |
+|-----|-------|
+| [CONNECTIONS.md](CONNECTIONS.md) | Como tudo se conecta + PNG |
+| [PATTERNS.md](PATTERNS.md) | Layered, DTO, Facade, RAII |
+| [RUST-CONCEPTS.md](RUST-CONCEPTS.md) | Traits, sem herança |
+| [REFACTOR-PLAN.md](REFACTOR-PLAN.md) | Próximas refatorações |
+
+---
+
 # Visão — quick-os (60 segundos)
 
 ## Não estamos montando um OS
@@ -40,4 +65,4 @@ Cursor SDK / Claude SDK        ← roda DENTRO da VM
 2. Aba **Files changed**
 3. Abre **`REVIEW.md`** ou **`docs/VISION.md`**
 
-Mermaid renderiza no GitHub. PNG: links diretos no REVIEW.md.
+PNG primeiro: [DIAGRAMS.md](DIAGRAMS.md). Mermaid só como extra no browser desktop.

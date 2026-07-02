@@ -4,9 +4,17 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
 pub enum GuestRequest {
-    ReadWorkspace { path: String },
-    RunTool { name: String, input: serde_json::Value },
-    EmitEvent { kind: String, payload: serde_json::Value },
+    ReadWorkspace {
+        path: String,
+    },
+    RunTool {
+        name: String,
+        input: serde_json::Value,
+    },
+    EmitEvent {
+        kind: String,
+        payload: serde_json::Value,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

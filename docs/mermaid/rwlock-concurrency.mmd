@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant R1 as Request A (list)
+    participant R2 as Request B (list)
+    participant R3 as Request C (spawn)
+    participant RW as RwLock HashMap
+    participant MAP as HashMap data
+
+    Note over RW: Estado inicial — livre
+
+    R1->>RW: read().await
+    RW->>MAP: guarda leitura (shared)
+    Note over RW: 1 leitor ativo
+
+    R2->>RW: read().await
+    RW->>MAP: guarda leitura (shared)
+    Note over RW: 2 leitores simultâneos OK
+
+    R1->>MAP: values() → AgentRecords
+    R2->>MAP: values() → AgentRecords
+    R1-->>RW: drop guard (read)
+    R2-->>RW: drop guard (read)
+    Note over RW: livre de novo
+
+    R3->>RW: write().await
+    Note over R3,RW: exclusivo — ninguém mais entra
+    RW->>MAP: insert(agent_id, entry)
+    R3-->>RW: drop guard (write)
+    Note over RW: livre
+
+    Note over R1,R3: Regra: vários read OU um write, nunca os dois juntos

@@ -1,0 +1,18 @@
+flowchart TB
+    subgraph states["Estados do RwLock"]
+        FREE[Livre]
+        READING["Leitura\n(N leitores)"]
+        WRITING["Escrita\n(1 escritor)"]
+    end
+
+    FREE -->|"read().await"| READING
+    READING -->|"mais read()"| READING
+    READING -->|"último guard drop"| FREE
+    FREE -->|"write().await"| WRITING
+    WRITING -->|"guard drop"| FREE
+
+    READING -.->|"write() bloqueia\naté todos saírem"| WAIT_W[Fila: write esperando]
+    WRITING -.->|"read() bloqueia\naté write terminar"| WAIT_R[Fila: reads esperando]
+
+    style WRITING fill:#8b0000,color:#fff
+    style READING fill:#1a5276,color:#fff

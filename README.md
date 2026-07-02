@@ -35,6 +35,10 @@ cargo run -p quick-os -- serve
 
 Protocol: `quick-os-core::guest_protocol`
 
+## Docs
+
+- [RWLOCK.md](docs/RWLOCK.md) — como `RwLock` protege o HashMap de agents (com PNG)
+
 ## Workspace
 
 ```

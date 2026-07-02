@@ -43,17 +43,25 @@ fn main() -> io::Result<()> {
     Ok(())
 }
 
-fn write_response(stdout: &mut impl Write, response: &quick_os_core::GuestResponse) -> io::Result<()> {
+fn write_response(
+    stdout: &mut impl Write,
+    response: &quick_os_core::GuestResponse,
+) -> io::Result<()> {
     match serde_json::to_string(response) {
         Ok(encoded) => {
             writeln!(stdout, "{encoded}")?;
             stdout.flush()
         }
         Err(e) => {
-            let fallback = quick_os_core::GuestResponse::failure(format!("serialize response: {e}"));
-            writeln!(stdout, "{}", serde_json::to_string(&fallback).unwrap_or_else(|_| {
-                r#"{"ok":false,"error":"fatal serialize"}"#.to_string()
-            }))?;
+            let fallback =
+                quick_os_core::GuestResponse::failure(format!("serialize response: {e}"));
+            writeln!(
+                stdout,
+                "{}",
+                serde_json::to_string(&fallback).unwrap_or_else(|_| {
+                    r#"{"ok":false,"error":"fatal serialize"}"#.to_string()
+                })
+            )?;
             stdout.flush()
         }
     }

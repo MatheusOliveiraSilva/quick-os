@@ -33,7 +33,10 @@ impl Workspace {
         }
 
         for component in path.components() {
-            if matches!(component, Component::ParentDir | Component::RootDir | Component::Prefix(_)) {
+            if matches!(
+                component,
+                Component::ParentDir | Component::RootDir | Component::Prefix(_)
+            ) {
                 return Err(WorkspaceError::Escape(relative.to_string()));
             }
         }

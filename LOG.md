@@ -127,8 +127,18 @@ sequenceDiagram
     D-->>U: AgentRecord
 ```
 
-**Próximo**
+## Passo 7 — Pivot: agent-os guest runtime (Path A)
 
-- Guest agent in-VM (comunicação host ↔ microVM)
-- Jailer + network namespace por agent
-- Dirty-page tracking para snapshot incremental
+**O que construímos**
+- Crate `agent-os` — runtime guest com primitivas v1
+- `read_workspace` / `run_tool` / `emit_event`
+- Protocolo `GuestRequest` / `GuestResponse` em `quick-os-core`
+- Demo stdio: `./scripts/demo-agent-os.sh` (simula vsock, sem KVM)
+- `docs/ARCHITECTURE.md` + diagrama sequência PNG
+
+**Conceito para lembrar**
+> **agent-os** é o produto vendável (Agent OS runtime). **quick-os** é host commodity (spawn + observe). Path B (kernel from scratch) fica Fase 3 opcional.
+
+**Próximo**
+- vsock bridge host ↔ guest
+- pack agent-os no rootfs + golden snapshot

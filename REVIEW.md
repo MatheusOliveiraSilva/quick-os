@@ -1,216 +1,54 @@
-# PR #5 — Review guide (mobile-friendly)
+# PR #5 — Pivot: agent-os guest runtime
 
-> **Branch:** `cursor/quick-os-dispatcher-bb04` → `main`  
 > **PR:** https://github.com/MatheusOliveiraSilva/quick-os/pull/5  
-> **Commits:** 8 (learning steps 1–5 + full scaffold + demo harness + this guide)
+> **Branch:** `cursor/quick-os-dispatcher-bb04`
 
-Este arquivo existe porque a **descrição do PR no GitHub pode ficar desatualizada**. **Tudo que importa está aqui e no diff.**
+## O que mudou neste pivot
 
-**Visão do produto (leia primeiro):** [docs/VISION.md](docs/VISION.md)
+| Antes | Depois |
+|-------|--------|
+| "Dispatcher Firecracker" | **agent-os** = produto (runtime para agents) |
+| Alpine guest genérico | **agent-os** Rust com primitivas v1 |
+| Só host-side tools | Protocolo host↔guest (`GuestRequest` / `GuestResponse`) |
 
-## Diagramas (funcionam no GitHub mobile)
+## Diagrama de sequência (abre no browser)
 
-### Stack — o que estamos construindo
+https://github.com/MatheusOliveiraSilva/quick-os/blob/cursor/quick-os-dispatcher-bb04/docs/images/agent-os-sequence.png
 
-```mermaid
-flowchart TB
-    subgraph Host["Host Linux + KVM"]
-        QO["quick-os dispatcher\nCLI + Tool HTTP + snapshots"]
-    end
-
-    subgraph VMs["Firecracker microVMs (1 por agent)"]
-        VM1["microVM"]
-        VM2["microVM"]
-    end
-
-    subgraph Runtime["Dentro de cada microVM"]
-        SDK["Cursor SDK / Claude Agent SDK"]
-    end
-
-    QO -->|"snapshot restore ~150ms"| VM1
-    QO -->|"snapshot restore ~150ms"| VM2
-    VM1 --> SDK
-    VM2 --> SDK
-
-    note["NÃO estamos criando um OS.\nOrquestramos VMs mínimas com agent runtime."]
-```
-
-### Spawn — por que snapshot ajuda
+## Mermaid (GitHub mobile)
 
 ```mermaid
 sequenceDiagram
-    participant U as Tu / Tool API
-    participant D as quick-os
-    participant FC as Firecracker
-    participant S as base.snap
+    participant Dev as API
+    participant Host as quick-os
+    participant Guest as agent-os
 
-    Note over U,S: Uma vez
-    U->>D: snapshot-create
-    D->>FC: boot VM + instala SDK
-    FC->>S: salva snapshot
-
-    Note over U,S: Cada agent (~150ms)
-    U->>D: agents.spawn
-    D->>FC: restore snapshot CoW
-    FC-->>D: VM pronta
+    Dev->>Host: agents.spawn
+    Host->>Guest: microVM + vsock
+    Dev->>Host: invoke primitive
+    Host->>Guest: GuestRequest JSON
+    Guest->>Guest: read_workspace / run_tool / emit_event
+    Guest-->>Host: GuestResponse
+    Host-->>Dev: result + events
 ```
 
-### PNG (se mermaid não renderizar)
-
-Abre estes links **no browser do celular**:
-
-- Stack: https://github.com/MatheusOliveiraSilva/quick-os/blob/cursor/quick-os-dispatcher-bb04/docs/images/quick-os-stack.png
-- Spawn: https://github.com/MatheusOliveiraSilva/quick-os/blob/cursor/quick-os-dispatcher-bb04/docs/images/quick-os-spawn-flow.png
-
-> **Nota:** imagens coladas no chat do Cursor **não carregam no celular**. Usa os links acima ou a aba **Files** do PR #5.
-
----
-
-## O que mudou (TL;DR)
-
-De um `main.rs` de tutorial → **workspace completo** de agent dispatcher:
-
-| Crate | O que faz |
-|-------|-----------|
-| `quick-os-core` | Config TOML, errors, `AgentId`, `SnapshotRef` |
-| `quick-os-firecracker` | Client HTTP via Unix socket, boot/restore/snapshot VM |
-| `quick-os-dispatcher` | Pool de agents, spawn via snapshot load |
-| `quick-os-tools` | Tool surface HTTP (Axum) + event log |
-| `quick-os` | CLI binary |
-
-+ `scripts/setup-dev.sh`, `scripts/demo-ci.sh`, `docker/`, `configs/quick-os.toml`
-
----
-
-## Diagrama — arquitetura
-
-```mermaid
-flowchart TB
-    subgraph CLI["quick-os CLI"]
-        CE[check-env]
-        SC[snapshot-create]
-        AS[agent-spawn]
-        SV[serve]
-    end
-
-    subgraph Core["quick-os-core"]
-        CFG[AppConfig]
-        AG[AgentId / AgentRecord]
-    end
-
-    subgraph FC["quick-os-firecracker"]
-        API[FirecrackerClient]
-        VM[VmBuilder]
-    end
-
-    subgraph DISP["quick-os-dispatcher"]
-        D[Dispatcher]
-    end
-
-    subgraph TOOLS["quick-os-tools"]
-        REG[ToolRegistry]
-        HTTP["Axum /health /tools /agents /events"]
-        LOG[EventLog]
-    end
-
-    CE --> CFG
-    SC --> D
-    AS --> D
-    SV --> D
-    SV --> HTTP
-    D --> VM --> API
-    HTTP --> REG --> D
-    REG --> LOG
-```
-
----
-
-## Diagrama — snapshot / fork
-
-```mermaid
-sequenceDiagram
-    participant U as User ou Tool surface
-    participant D as Dispatcher
-    participant FC as Firecracker
-    participant S as Snapshot files
-
-    Note over U,S: snapshot-create (uma vez)
-    U->>D: create_base_snapshot("base")
-    D->>FC: boot VM + pause + snapshot/create
-    FC->>S: vm_state.snap + mem.snap
-
-    Note over U,S: agent-spawn (fork)
-    U->>D: spawn_from_snapshot("base")
-    D->>FC: novo processo + snapshot/load (CoW)
-    D->>FC: Resume
-    D-->>U: AgentRecord
-```
-
----
-
-## Demo rodada (CI — sem KVM)
-
-```text
-════════════════════════════════════════
-  BUILD
-════════════════════════════════════════
-    Finished `dev` profile [unoptimized + debuginfo] target(s)
-
-════════════════════════════════════════
-  CLI
-════════════════════════════════════════
-Usage: quick-os [OPTIONS] <COMMAND>
-
-Commands:
-  check-env        Validate host prerequisites
-  snapshot-create  Boot a fresh VM and capture a base snapshot
-  agent-spawn      Restore/fork an agent VM from snapshot
-  serve            Run dispatcher + observable HTTP tool surface
-
-════════════════════════════════════════
-  CHECK-ENV (CI)
-════════════════════════════════════════
-  /dev/kvm:              MISSING      ← esperado no CI
-  firecracker binary:    MISSING
-  guest kernel:          MISSING
-  guest rootfs:          MISSING
-
-════════════════════════════════════════
-  SMOKE TESTS (no KVM)
-════════════════════════════════════════
-test health_endpoint_returns_ok ... ok
-test tools_endpoint_lists_builtin_tools ... ok
-```
-
-Reproduzir: `./scripts/demo-ci.sh`
-
----
-
-## Onde olhar no diff (ordem sugerida)
-
-1. **`REVIEW.md`** (este arquivo)
-2. **`LOG.md`** — log de aprendizado + harness mobile/PR
-3. **`README.md`** — quick start com KVM
-4. **`crates/quick-os/src/main.rs`** — CLI entry
-5. **`crates/quick-os-dispatcher/src/dispatcher.rs`** — orquestração
-6. **`crates/quick-os-firecracker/src/vm.rs`** — lifecycle Firecracker
-7. **`crates/quick-os-tools/src/server.rs`** — HTTP tool surface
-8. **`scripts/demo-ci.sh`** — demo sem KVM
-
----
-
-## Na tua máquina (com KVM)
+## Demo terminal (rodado no CI — copia output abaixo)
 
 ```bash
-./scripts/setup-dev.sh
-cargo run -p quick-os -- check-env
-cargo run -p quick-os -- snapshot-create --id base
-cargo run -p quick-os -- serve
-curl localhost:8080/tools
+./scripts/demo-agent-os.sh
 ```
 
----
+Ver output em: `docs/demo-output.txt` (gerado no commit)
 
-## Perguntas
+## Ficheiros-chave deste pivot
 
-Deixa inline **neste PR** — respondo no comment ou aqui no agent.
+| File | Why |
+|------|-----|
+| `crates/agent-os/` | Guest runtime ★ |
+| `crates/quick-os-core/src/guest_protocol.rs` | Protocolo partilhado |
+| `docs/ARCHITECTURE.md` | Plano completo Path A |
+| `scripts/demo-agent-os.sh` | Demo sem KVM |
+
+## Perguntas inline
+
+Comenta neste PR — respondo aqui ou no thread.

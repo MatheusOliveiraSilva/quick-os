@@ -18,6 +18,10 @@ cargo run -p quick-os -- check-env || true
 
 section "SMOKE TESTS (no KVM)"
 cargo test -p quick-os-tools -- --nocapture
+cargo test -p agent-os -- --nocapture
+
+section "AGENT-OS DEMO (guest primitives)"
+./scripts/demo-agent-os.sh | tee docs/demo-output.txt
 
 section "CONFIG"
 echo "--- configs/quick-os.toml ---"

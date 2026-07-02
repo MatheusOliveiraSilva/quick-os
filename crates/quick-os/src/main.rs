@@ -11,7 +11,10 @@ use quick_os_tools::{EventLog, ToolRegistry, ToolServer};
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser)]
-#[command(name = "quick-os", about = "Agent dispatcher on Firecracker microVMs")]
+#[command(
+    name = "quick-os",
+    about = "Host orchestrator: Firecracker microVMs + agent-os guest runtime"
+)]
 struct Cli {
     #[arg(short, long, default_value = "configs/quick-os.toml")]
     config: PathBuf,
@@ -36,6 +39,8 @@ enum Command {
     },
     /// Run dispatcher + observable HTTP tool surface
     Serve,
+    /// Demo agent-os guest primitives locally (no KVM)
+    DemoGuest,
 }
 
 #[tokio::main]
@@ -77,6 +82,15 @@ async fn main() -> anyhow::Result<()> {
             let registry = Arc::new(ToolRegistry::new(dispatcher, events));
             let server = ToolServer::new(registry);
             server.serve(listen).await?;
+        }
+        Command::DemoGuest => {
+            let status = std::process::Command::new("bash")
+                .arg("scripts/demo-agent-os.sh")
+                .status()
+                .context("run demo-agent-os.sh")?;
+            if !status.success() {
+                std::process::exit(status.code().unwrap_or(1));
+            }
         }
     }
 

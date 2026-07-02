@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "crates/agent-os",
     "crates/quick-os-core",
     "crates/quick-os-firecracker",
     "crates/quick-os-dispatcher",
@@ -34,6 +35,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "=1.11.0", features = ["v4", "serde"] }
 
 quick-os-core = { path = "crates/quick-os-core" }
+agent-os = { path = "crates/agent-os" }
 quick-os-dispatcher = { path = "crates/quick-os-dispatcher" }
 quick-os-firecracker = { path = "crates/quick-os-firecracker" }
 quick-os-tools = { path = "crates/quick-os-tools" }

@@ -1,10 +1,8 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use quick_os_core::{
-    AgentId, AgentRecord, AgentState, AppConfig, QuickOsError, SnapshotRef,
-};
-use quick_os_firecracker::{VmBuilder, VmHandle};
+use quick_os_core::{AgentId, AgentRecord, AgentState, AppConfig, QuickOsError, SnapshotRef};
+use quick_os_firecracker::{VmBuilder, VmHandle, GUEST_BOOT_SETTLE_SECS};
 use tokio::sync::RwLock;
 use tracing::info;
 
@@ -16,8 +14,8 @@ pub struct Dispatcher {
 
 struct AgentEntry {
     record: AgentRecord,
-    #[allow(dead_code)]
-    vm: VmHandle,
+    /// Keeps the Firecracker child process alive for this agent.
+    _vm: VmHandle,
 }
 
 impl Dispatcher {
@@ -68,11 +66,7 @@ impl Dispatcher {
 
         let vm = self
             .vm_builder
-            .restore_from_snapshot(
-                &agent_str,
-                &snapshot.vm_state_path,
-                &snapshot.mem_path,
-            )
+            .restore_from_snapshot(&agent_str, &snapshot.vm_state_path, &snapshot.mem_path)
             .await?;
 
         let record = AgentRecord {
@@ -87,7 +81,7 @@ impl Dispatcher {
             agent_id,
             AgentEntry {
                 record: record.clone(),
-                vm,
+                _vm: vm,
             },
         );
 
@@ -95,7 +89,10 @@ impl Dispatcher {
         Ok(record)
     }
 
-    pub async fn create_base_snapshot(&self, snapshot_id: &str) -> Result<SnapshotRef, QuickOsError> {
+    pub async fn create_base_snapshot(
+        &self,
+        snapshot_id: &str,
+    ) -> Result<SnapshotRef, QuickOsError> {
         let snapshot_dir = self.config.snapshot_dir(snapshot_id);
         if snapshot_dir.exists() {
             return Err(QuickOsError::dispatcher(format!(
@@ -106,12 +103,10 @@ impl Dispatcher {
         let boot_id = format!("boot-{snapshot_id}");
         let vm = self.vm_builder.boot_fresh(&boot_id).await?;
 
-        // Allow guest to settle before snapshotting.
-        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        // TODO(vsock): poll guest agent-runtime /health instead of fixed sleep.
+        tokio::time::sleep(std::time::Duration::from_secs(GUEST_BOOT_SETTLE_SECS)).await;
 
-        self.vm_builder
-            .create_snapshot(&vm, &snapshot_dir)
-            .await?;
+        self.vm_builder.create_snapshot(&vm, &snapshot_dir).await?;
 
         drop(vm);
 

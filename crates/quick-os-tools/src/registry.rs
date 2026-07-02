@@ -109,10 +109,7 @@ impl ToolRegistry {
                     .get("snapshot_id")
                     .and_then(Value::as_str)
                     .ok_or_else(|| QuickOsError::tool("missing snapshot_id"))?;
-                let snapshot = self
-                    .dispatcher
-                    .create_base_snapshot(snapshot_id)
-                    .await?;
+                let snapshot = self.dispatcher.create_base_snapshot(snapshot_id).await?;
                 json!({ "snapshot": snapshot })
             }
             other => return Err(QuickOsError::tool(format!("unknown tool: {other}"))),

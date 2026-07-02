@@ -26,4 +26,4 @@ cat configs/quick-os.toml
 section "KVM NOTE"
 echo "Full Firecracker flow (snapshot-create / agent-spawn / serve with real VMs)"
 echo "requires /dev/kvm + ./scripts/setup-dev.sh on a Linux host."
-echo "Review PR #4 from phone; ask questions inline on the PR."
+echo "Review PR #5 from phone; ask questions inline on the PR."

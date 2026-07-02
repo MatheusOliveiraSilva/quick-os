@@ -43,7 +43,10 @@ impl AppConfig {
     }
 
     pub fn snapshot_dir(&self, snapshot_id: &str) -> PathBuf {
-        self.firecracker.data_dir.join("snapshots").join(snapshot_id)
+        self.firecracker
+            .data_dir
+            .join("snapshots")
+            .join(snapshot_id)
     }
 
     pub fn agents_dir(&self) -> PathBuf {

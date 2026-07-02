@@ -55,10 +55,7 @@ impl FirecrackerClient {
         path: &str,
         body: Option<Vec<u8>>,
     ) -> Result<(), QuickOsError> {
-        let uri: Uri = Uri::new(
-            self.socket_path.to_string_lossy().into_owned(),
-            path,
-        );
+        let uri: Uri = Uri::new(self.socket_path.to_string_lossy().into_owned(), path);
 
         let mut builder = Request::builder().method(method).uri(uri);
         let request = if let Some(body) = body {

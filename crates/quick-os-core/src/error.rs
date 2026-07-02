@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use thiserror::Error;
 
@@ -53,11 +53,14 @@ impl QuickOsError {
 
 pub type Result<T> = std::result::Result<T, QuickOsError>;
 
-pub fn ensure_path_exists(path: &PathBuf, label: &str) -> Result<()> {
+pub fn ensure_path_exists(path: &Path, label: &str) -> Result<()> {
     if path.exists() {
         Ok(())
     } else {
-        Err(QuickOsError::environment(format!("missing {label}: {}", path.display())))
+        Err(QuickOsError::environment(format!(
+            "missing {label}: {}",
+            path.display()
+        )))
     }
 }
 

@@ -7,6 +7,9 @@ use tracing::info;
 
 use crate::client::FirecrackerClient;
 
+/// Temporary boot wait before snapshotting. Replace with guest health probe (vsock/serial).
+pub const GUEST_BOOT_SETTLE_SECS: u64 = 2;
+
 #[derive(Debug, Clone, Serialize)]
 pub struct MachineConfig {
     pub vcpu_count: u8,
@@ -114,7 +117,12 @@ impl VmBuilder {
             .await?;
 
         client
-            .put_json("/actions", &VmAction { action_type: "InstanceStart" })
+            .put_json(
+                "/actions",
+                &VmAction {
+                    action_type: "InstanceStart",
+                },
+            )
             .await?;
 
         info!(agent_id = id, "firecracker vm started");
@@ -157,7 +165,12 @@ impl VmBuilder {
             .await?;
 
         client
-            .put_json("/actions", &VmAction { action_type: "Resume" })
+            .put_json(
+                "/actions",
+                &VmAction {
+                    action_type: "Resume",
+                },
+            )
             .await?;
 
         info!(agent_id = id, "firecracker vm restored from snapshot");
@@ -216,12 +229,7 @@ fn spawn_firecracker(binary: &Path, socket_path: &Path) -> Result<Child, QuickOs
         .stdout(Stdio::null())
         .stderr(Stdio::null())
         .spawn()
-        .map_err(|e| {
-            QuickOsError::firecracker(format!(
-                "spawn {}: {e}",
-                binary.display()
-            ))
-        })
+        .map_err(|e| QuickOsError::firecracker(format!("spawn {}: {e}", binary.display())))
 }
 
 async fn wait_for_socket(path: &Path) -> Result<(), QuickOsError> {

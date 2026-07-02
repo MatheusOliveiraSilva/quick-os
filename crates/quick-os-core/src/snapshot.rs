@@ -10,9 +10,7 @@ pub struct SnapshotRef {
 }
 
 impl SnapshotRef {
-    pub fn dir(&self) -> &std::path::Path {
-        self.vm_state_path
-            .parent()
-            .expect("snapshot vm_state_path must have parent")
+    pub fn dir(&self) -> Option<&std::path::Path> {
+        self.vm_state_path.parent()
     }
 }

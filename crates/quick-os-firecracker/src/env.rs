@@ -52,5 +52,8 @@ pub fn print_report(report: &EnvironmentReport, config: &AppConfig) {
         mark(report.rootfs),
         config.guest.rootfs_path.display()
     );
-    println!("  data dir:              {}", config.firecracker.data_dir.display());
+    println!(
+        "  data dir:              {}",
+        config.firecracker.data_dir.display()
+    );
 }

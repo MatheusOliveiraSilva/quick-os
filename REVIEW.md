@@ -4,7 +4,15 @@
 > **PR:** https://github.com/MatheusOliveiraSilva/quick-os/pull/5  
 > **Commits:** 8 (learning steps 1–5 + full scaffold + demo harness + this guide)
 
-Este arquivo existe porque a **descrição do PR no GitHub ficou desatualizada** (API do agent não consegue editar). **Tudo que importa está aqui e no diff.**
+Este arquivo existe porque a **descrição do PR no GitHub pode ficar desatualizada**. **Tudo que importa está aqui e no diff.**
+
+**Visão do produto (leia primeiro):** [docs/VISION.md](docs/VISION.md)
+
+**Diagramas:**
+
+![Stack](docs/images/quick-os-stack.png)
+
+![Spawn flow](docs/images/quick-os-spawn-flow.png)
 
 ---
 

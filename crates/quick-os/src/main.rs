@@ -70,11 +70,7 @@ async fn main() -> anyhow::Result<()> {
         }
         Command::Serve => {
             require_environment(&config)?;
-            let listen: SocketAddr = config
-                .tools
-                .listen
-                .parse()
-                .context("parse tools.listen")?;
+            let listen: SocketAddr = config.tools.listen.parse().context("parse tools.listen")?;
 
             let dispatcher = Arc::new(Dispatcher::new(config));
             let events = EventLog::new(1024);

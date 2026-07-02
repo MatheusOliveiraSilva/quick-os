@@ -1,0 +1,26 @@
+flowchart LR
+    subgraph python["Python — herança"]
+        PY_ABC["class Tool(ABC)\n  @abstractmethod run"]
+        PY_ECHO["class EchoTool(Tool)"]
+        PY_PWD["class PwdTool(Tool)"]
+        PY_ABC --> PY_ECHO
+        PY_ABC --> PY_PWD
+    end
+
+    subgraph rust["Rust — traits + composição"]
+        R_TRAIT["trait Tool {\n  fn run(&self) → ...\n}"]
+        R_ECHO["struct EchoTool"]
+        R_PWD["struct PwdTool"]
+        R_IMPL1["impl Tool for EchoTool"]
+        R_IMPL2["impl Tool for PwdTool"]
+        R_TRAIT -.->|implementa| R_IMPL1
+        R_TRAIT -.->|implementa| R_IMPL2
+        R_ECHO --> R_IMPL1
+        R_PWD --> R_IMPL2
+    end
+
+    subgraph note["Sem herança de struct"]
+        N1["struct não herda struct"]
+        N2["trait define contrato"]
+        N3["impl separado da definição"]
+    end

@@ -1,0 +1,15 @@
+---
+description: Diagram output rules for mobile review (Matheus)
+alwaysApply: true
+---
+
+When creating or updating architecture/flow diagrams for this repo:
+
+1. Add or update source in `docs/mermaid/*.mmd`
+2. Run `./scripts/render-diagrams.sh` to produce `docs/images/*.png`
+3. **Always give PNG links** using raw GitHub URLs:
+   `https://raw.githubusercontent.com/MatheusOliveiraSilva/quick-os/main/docs/images/<file>.png`
+4. Mermaid blocks in markdown are optional (GitHub web); PNG links are **required** for mobile.
+5. Register new diagrams in `docs/DIAGRAMS.md`
+
+Owner preference: Matheus reviews from mobile — diagrams without PNG links are incomplete.

@@ -1,0 +1,66 @@
+flowchart TB
+    subgraph user["Você / API / Cursor"]
+        DEV[Developer ou Agent SDK]
+    end
+
+    subgraph cli["quick-os CLI"]
+        MAIN[main.rs — composition root]
+    end
+
+    subgraph tools_crate["quick-os-tools"]
+        TS[ToolServer — HTTP Axum]
+        TR[ToolRegistry — Facade]
+        EL[EventLog]
+    end
+
+    subgraph disp_crate["quick-os-dispatcher"]
+        DISP[Dispatcher]
+        AGENTS[(HashMap AgentId → AgentEntry)]
+    end
+
+    subgraph fc_crate["quick-os-firecracker"]
+        VB[VmBuilder — Factory]
+        FC[FirecrackerClient]
+        VH[VmHandle — RAII]
+    end
+
+    subgraph core["quick-os-core — DTOs + protocolo"]
+        CFG[AppConfig]
+        GR[GuestRequest / GuestResponse]
+        AR[AgentRecord / AgentId]
+    end
+
+    subgraph guest_vm["microVM Firecracker"]
+        subgraph agent_os["agent-os guest"]
+            RT[AgentRuntime]
+            WS[Workspace — sandbox]
+            BT[BuiltinTool]
+        end
+    end
+
+    DEV -->|HTTP /tools| TS
+    MAIN --> TS
+    MAIN --> DISP
+    TS --> TR
+    TR --> DISP
+    TR --> EL
+    DISP --> AGENTS
+    DISP --> VB
+    AGENTS --> VH
+    VB --> FC
+    VB --> VH
+    FC -->|Unix socket HTTP| KVM[(Firecracker process)]
+
+    KVM --> guest_vm
+
+    GR -.->|stdio hoje / vsock futuro| RT
+    RT --> WS
+    RT --> BT
+
+    DISP -.-> CFG
+    VB -.-> CFG
+    TR -.-> AR
+
+    style agent_os fill:#2d5016,color:#fff
+    style core fill:#1a365d,color:#fff
+    style tools_crate fill:#553c9a,color:#fff

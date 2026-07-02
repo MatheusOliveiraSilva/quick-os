@@ -8,11 +8,61 @@ Este arquivo existe porque a **descrição do PR no GitHub pode ficar desatualiz
 
 **Visão do produto (leia primeiro):** [docs/VISION.md](docs/VISION.md)
 
-**Diagramas:**
+## Diagramas (funcionam no GitHub mobile)
 
-![Stack](docs/images/quick-os-stack.png)
+### Stack — o que estamos construindo
 
-![Spawn flow](docs/images/quick-os-spawn-flow.png)
+```mermaid
+flowchart TB
+    subgraph Host["Host Linux + KVM"]
+        QO["quick-os dispatcher\nCLI + Tool HTTP + snapshots"]
+    end
+
+    subgraph VMs["Firecracker microVMs (1 por agent)"]
+        VM1["microVM"]
+        VM2["microVM"]
+    end
+
+    subgraph Runtime["Dentro de cada microVM"]
+        SDK["Cursor SDK / Claude Agent SDK"]
+    end
+
+    QO -->|"snapshot restore ~150ms"| VM1
+    QO -->|"snapshot restore ~150ms"| VM2
+    VM1 --> SDK
+    VM2 --> SDK
+
+    note["NÃO estamos criando um OS.\nOrquestramos VMs mínimas com agent runtime."]
+```
+
+### Spawn — por que snapshot ajuda
+
+```mermaid
+sequenceDiagram
+    participant U as Tu / Tool API
+    participant D as quick-os
+    participant FC as Firecracker
+    participant S as base.snap
+
+    Note over U,S: Uma vez
+    U->>D: snapshot-create
+    D->>FC: boot VM + instala SDK
+    FC->>S: salva snapshot
+
+    Note over U,S: Cada agent (~150ms)
+    U->>D: agents.spawn
+    D->>FC: restore snapshot CoW
+    FC-->>D: VM pronta
+```
+
+### PNG (se mermaid não renderizar)
+
+Abre estes links **no browser do celular**:
+
+- Stack: https://github.com/MatheusOliveiraSilva/quick-os/blob/cursor/quick-os-dispatcher-bb04/docs/images/quick-os-stack.png
+- Spawn: https://github.com/MatheusOliveiraSilva/quick-os/blob/cursor/quick-os-dispatcher-bb04/docs/images/quick-os-spawn-flow.png
+
+> **Nota:** imagens coladas no chat do Cursor **não carregam no celular**. Usa os links acima ou a aba **Files** do PR #5.
 
 ---
 
